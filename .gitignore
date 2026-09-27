@@ -62,3 +62,10 @@ flatbuild
 
 # Snap
 *.snap
+
+# Zenith build artifacts
+zenith_dist/
+temp_portable.zip
+ZenithPayload.zip
+*.exe
+*.zip
