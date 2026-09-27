@@ -17,7 +17,7 @@ public:
     static ZenithDiscordRPC& instance();
 
     void initialize();
-    void setPlayingInstance(const QString& instanceName, const QString& mcVersion, const QString& loader = "");
+    void setPlayingInstance(const QString& instanceName, const QString& mcVersion = "", const QString& loader = "");
     void clearActivity();
 
 private slots:

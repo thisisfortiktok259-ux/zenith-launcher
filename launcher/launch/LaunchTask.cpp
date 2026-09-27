@@ -75,7 +75,7 @@ void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
 void LaunchTask::executeTask()
 {
     m_instance->setCrashed(false);
-    ZenithDiscordRPC::instance().setPlayingInstance(m_instance->name(), m_instance->intendedVersionId());
+    ZenithDiscordRPC::instance().setPlayingInstance(m_instance->name(), m_instance->getStatusbarDescription());
     if (!m_steps.size()) {
         state = LaunchTask::Finished;
         emitSucceeded();

@@ -55,58 +55,45 @@ jobs:
 
           tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
-          for d in PrismLauncher-Windows-MSVC*; do
+          for d in *Windows-MSVC*; do
             cd "${d}" || continue
             LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             ARM64="$(echo -n ${d} | grep -o arm64 || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PrismLauncher-Windows-MSVC"
+            NAME="ZenithLauncher-Windows-MSVC"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${ARM64}" || NAME="${NAME}-arm64"
             test -z "${PORT}" || NAME="${NAME}-Portable"
-            test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -z "${INST}" || mv *.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
             cd ..
           done
 
-          for d in PrismLauncher-Windows-MinGW-w64*; do
+          for d in *Windows-MinGW-w64*; do
             cd "${d}" || continue
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PrismLauncher-Windows-MinGW-w64"
+            NAME="ZenithLauncher-Windows-MinGW-w64"
             test -z "${PORT}" || NAME="${NAME}-Portable"
-            test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -z "${INST}" || mv *.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
             cd ..
           done
 
       - name: Create release
         id: create_release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
-          name: Prism Launcher ${{ env.VERSION }}
-          draft: true
+          name: Zenith Launcher ${{ env.VERSION }}
+          draft: false
           prerelease: false
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
           files: |
-            PrismLauncher-Linux-x86_64.AppImage
-            PrismLauncher-Linux-x86_64.AppImage.zsync
-            PrismLauncher-Linux-aarch64.AppImage
-            PrismLauncher-Linux-aarch64.AppImage.zsync
-            PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PrismLauncher-Linux-aarch64-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-macOS-${{ env.VERSION }}.zip
-            PrismLauncher-macOS-${{ env.VERSION }}.dmg
-            PrismLauncher-${{ env.VERSION }}.tar.gz
+            *.AppImage*
+            *.tar.gz
+            *.zip
+            *.exe
+            *.dmg
