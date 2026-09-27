@@ -1,0 +1,78 @@
+name: Zenith Launcher Windows Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-type:
+        description: "Build Type (Release or Debug)"
+        type: choice
+        options:
+          - Release
+          - RelWithDebInfo
+          - Debug
+        default: Release
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build_windows:
+    name: Build Zenith Windows (${{ matrix.artifact-name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            artifact-name: Windows-MSVC
+            cmake-preset: windows_msvc
+            vcvars-arch: amd64
+            qt-version: 6.11.2
+
+    env:
+      ARTIFACT_NAME: ZenithLauncher-${{ matrix.artifact-name }}
+      BUILD_PLATFORM: official
+      BUILD_TYPE: ${{ github.event.inputs.build-type || 'Release' }}
+      CMAKE_PRESET: ${{ matrix.cmake-preset }}
+
+    steps:
+      - name: Checkout Zenith Launcher Source
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Dependencies & Qt 6
+        id: setup-dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          build-type: ${{ env.BUILD_TYPE }}
+          artifact-name: ${{ matrix.artifact-name }}
+          vcvars-arch: ${{ matrix.vcvars-arch }}
+          qt-version: ${{ matrix.qt-version }}
+
+      - name: Configure CMake
+        run: |
+          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET"
+
+      - name: Build Zenith Binary
+        run: |
+          cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+
+      - name: Package Windows Artifacts (Setup.exe & Portable.zip)
+        uses: ./.github/actions/package/windows
+        with:
+          version: ${{ github.ref_name || 'latest' }}
+          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
+          artifact-name: ${{ matrix.artifact-name }}
+
+      - name: Upload Release Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZenithLauncher-Windows-Binaries
+          path: |
+            *.exe
+            *.zip
